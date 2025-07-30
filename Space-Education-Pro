@@ -1,0 +1,785 @@
+index.html<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Education Pro - Interactive Solar System Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        .orbitron { font-family: 'Orbitron', monospace; }
+        .inter { font-family: 'Inter', sans-serif; }
+        
+        .planet-orbit {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            position: absolute;
+            animation: rotate 20s linear infinite;
+        }
+        
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            animation: counter-rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes counter-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        
+        .mercury { animation-duration: 8s; }
+        .venus { animation-duration: 12s; }
+        .earth { animation-duration: 16s; }
+        .mars { animation-duration: 24s; }
+        .jupiter { animation-duration: 32s; }
+        .saturn { animation-duration: 40s; }
+        .uranus { animation-duration: 48s; }
+        .neptune { animation-duration: 56s; }
+        
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: shoot 3s linear infinite;
+        }
+        
+        @keyframes shoot {
+            0% { transform: translateX(-100px) translateY(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(100px) translateY(100px); opacity: 0; }
+        }
+        
+        .quiz-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .mission-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            animation: progress-glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes progress-glow {
+            0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen text-white inter">
+    <!-- Navigation -->
+    <nav class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span class="text-xl">🚀</span>
+                    </div>
+                    <h1 class="text-xl font-bold orbitron">Space Education Pro</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="loginBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                        Login
+                    </button>
+                    <div id="userInfo" class="hidden flex items-center space-x-3">
+                        <span id="userName" class="text-sm"></span>
+                        <button id="logoutBtn" class="text-red-400 hover:text-red-300 text-sm">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4 border border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 orbitron text-center">Welcome to Space Education Pro</h2>
+            <div class="space-y-4">
+                <button id="teacherLogin" class="w-full bg-purple-600 hover:bg-purple-700 py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                    <span>👩‍🏫</span>
+                    <span>Login as Teacher</span>
+                </button>
+                <button id="studentLogin" class="w-full bg-blue-600 hover:bg-blue-700 py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                    <span>👨‍🎓</span>
+                    <span>Login as Student</span>
+                </button>
+            </div>
+            <button id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="text-center mb-12">
+            <h2 class="text-4xl md:text-6xl font-bold orbitron mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Explore the Universe
+            </h2>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Embark on an interactive journey through our solar system. Learn about planets, complete missions, and test your knowledge with engaging quizzes.
+            </p>
+        </div>
+
+        <!-- Solar System Visualization -->
+        <div class="relative w-full h-96 mb-16 bg-black/20 rounded-2xl overflow-hidden border border-white/10">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <!-- Sun -->
+                <div class="w-8 h-8 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50 z-10"></div>
+                
+                <!-- Shooting Stars -->
+                <div class="shooting-star" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+                <div class="shooting-star" style="top: 60%; left: 80%; animation-delay: 1s;"></div>
+                <div class="shooting-star" style="top: 80%; left: 20%; animation-delay: 2s;"></div>
+                
+                <!-- Mercury Orbit -->
+                <div class="planet-orbit mercury w-24 h-24">
+                    <div class="planet w-2 h-2 bg-gray-400 top-0 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+                
+                <!-- Venus Orbit -->
+                <div class="planet-orbit venus w-32 h-32">
+                    <div class="planet w-3 h-3 bg-orange-300 top-0 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+                
+                <!-- Earth Orbit -->
+                <div class="planet-orbit earth w-40 h-40">
+                    <div class="planet w-4 h-4 bg-blue-500 top-0 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+                
+                <!-- Mars Orbit -->
+                <div class="planet-orbit mars w-48 h-48">
+                    <div class="planet w-3 h-3 bg-red-500 top-0 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+                
+                <!-- Jupiter Orbit -->
+                <div class="planet-orbit jupiter w-64 h-64">
+                    <div class="planet w-6 h-6 bg-yellow-600 top-0 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+                
+                <!-- Saturn Orbit -->
+                <div class="planet-orbit saturn w-80 h-80">
+                    <div class="planet w-5 h-5 bg-yellow-500 top-0 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Missions Panel -->
+            <div class="lg:col-span-2">
+                <h3 class="text-2xl font-bold mb-6 orbitron">🚀 Space Missions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mission-card bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 rounded-xl border border-white/10 transition-all duration-300 cursor-pointer" onclick="startMission('mars')">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-red-500 rounded-full mr-4 flex items-center justify-center text-2xl">🔴</div>
+                            <div>
+                                <h4 class="font-bold text-lg">Mars Exploration</h4>
+                                <p class="text-sm text-gray-300">Discover the Red Planet</p>
+                            </div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3 mb-4">
+                            <p class="text-sm">Learn about Mars' atmosphere, geology, and potential for life. Complete interactive challenges!</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs bg-blue-600 px-2 py-1 rounded">Intermediate</span>
+                            <span class="text-xs text-gray-400">45 min</span>
+                        </div>
+                    </div>
+
+                    <div class="mission-card bg-gradient-to-br from-purple-800/50 to-pink-800/50 p-6 rounded-xl border border-white/10 transition-all duration-300 cursor-pointer" onclick="startMission('jupiter')">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-600 rounded-full mr-4 flex items-center justify-center text-2xl">🟡</div>
+                            <div>
+                                <h4 class="font-bold text-lg">Jupiter's Moons</h4>
+                                <p class="text-sm text-gray-300">Explore the Gas Giant</p>
+                            </div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3 mb-4">
+                            <p class="text-sm">Investigate Jupiter's fascinating moons including Europa, Io, Ganymede, and Callisto.</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs bg-purple-600 px-2 py-1 rounded">Advanced</span>
+                            <span class="text-xs text-gray-400">60 min</span>
+                        </div>
+                    </div>
+
+                    <div class="mission-card bg-gradient-to-br from-green-800/50 to-blue-800/50 p-6 rounded-xl border border-white/10 transition-all duration-300 cursor-pointer" onclick="startMission('earth')">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full mr-4 flex items-center justify-center text-2xl">🌍</div>
+                            <div>
+                                <h4 class="font-bold text-lg">Earth Systems</h4>
+                                <p class="text-sm text-gray-300">Our Home Planet</p>
+                            </div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3 mb-4">
+                            <p class="text-sm">Study Earth's atmosphere, oceans, and climate systems from a space perspective.</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs bg-green-600 px-2 py-1 rounded">Beginner</span>
+                            <span class="text-xs text-gray-400">30 min</span>
+                        </div>
+                    </div>
+
+                    <div class="mission-card bg-gradient-to-br from-yellow-800/50 to-orange-800/50 p-6 rounded-xl border border-white/10 transition-all duration-300 cursor-pointer" onclick="startMission('sun')">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-400 rounded-full mr-4 flex items-center justify-center text-2xl">☀️</div>
+                            <div>
+                                <h4 class="font-bold text-lg">Solar Science</h4>
+                                <p class="text-sm text-gray-300">Power of Our Star</p>
+                            </div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3 mb-4">
+                            <p class="text-sm">Understand solar flares, sunspots, and how the Sun powers our entire solar system.</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs bg-yellow-600 px-2 py-1 rounded">Intermediate</span>
+                            <span class="text-xs text-gray-400">40 min</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress & Quiz Panel -->
+            <div class="space-y-8">
+                <!-- Progress Tracker -->
+                <div class="bg-black/30 backdrop-blur-sm p-6 rounded-xl border border-white/10">
+                    <h3 class="text-xl font-bold mb-4 orbitron">📊 Your Progress</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span>Missions Completed</span>
+                                <span id="missionsCompleted">0/4</span>
+                            </div>
+                            <div class="bg-gray-700 rounded-full h-2">
+                                <div id="missionProgress" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span>Quiz Score</span>
+                                <span id="quizScore">0%</span>
+                            </div>
+                            <div class="bg-gray-700 rounded-full h-2">
+                                <div id="scoreProgress" class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-gray-600">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-yellow-400" id="totalPoints">0</div>
+                                <div class="text-sm text-gray-400">Space Points Earned</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Quiz -->
+                <div class="bg-black/30 backdrop-blur-sm p-6 rounded-xl border border-white/10">
+                    <h3 class="text-xl font-bold mb-4 orbitron">🧠 Quick Quiz</h3>
+                    <div id="quizContainer">
+                        <div class="mb-4">
+                            <p class="text-sm mb-3" id="quizQuestion">Which planet is known as the Red Planet?</p>
+                            <div class="space-y-2">
+                                <button class="quiz-option w-full text-left p-3 bg-gray-700 hover:bg-blue-600 rounded-lg transition-all duration-300" onclick="selectAnswer(this, false)">Venus</button>
+                                <button class="quiz-option w-full text-left p-3 bg-gray-700 hover:bg-blue-600 rounded-lg transition-all duration-300" onclick="selectAnswer(this, true)">Mars</button>
+                                <button class="quiz-option w-full text-left p-3 bg-gray-700 hover:bg-blue-600 rounded-lg transition-all duration-300" onclick="selectAnswer(this, false)">Jupiter</button>
+                                <button class="quiz-option w-full text-left p-3 bg-gray-700 hover:bg-blue-600 rounded-lg transition-all duration-300" onclick="selectAnswer(this, false)">Saturn</button>
+                            </div>
+                        </div>
+                        <button id="nextQuizBtn" class="w-full bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-lg transition-colors hidden" onclick="nextQuiz()">
+                            Next Question
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teacher Dashboard (Hidden by default) -->
+        <div id="teacherDashboard" class="hidden">
+            <div class="bg-black/30 backdrop-blur-sm p-8 rounded-xl border border-white/10 mb-8">
+                <h3 class="text-2xl font-bold mb-6 orbitron text-purple-400">👩‍🏫 Teacher Dashboard</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-purple-800/30 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Class Overview</h4>
+                        <div class="text-3xl font-bold text-purple-400 mb-2">24</div>
+                        <p class="text-sm text-gray-300">Active Students</p>
+                    </div>
+                    <div class="bg-blue-800/30 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Avg. Progress</h4>
+                        <div class="text-3xl font-bold text-blue-400 mb-2">78%</div>
+                        <p class="text-sm text-gray-300">Mission Completion</p>
+                    </div>
+                    <div class="bg-green-800/30 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Quiz Scores</h4>
+                        <div class="text-3xl font-bold text-green-400 mb-2">85%</div>
+                        <p class="text-sm text-gray-300">Class Average</p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <button class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition-colors mr-4">
+                        Create Assignment
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                        View Student Reports
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mission Modal -->
+    <div id="missionModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-2xl w-full mx-4 border border-gray-700 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="missionTitle" class="text-2xl font-bold orbitron">Mission: Mars Exploration</h2>
+                <button id="closeMissionModal" class="text-gray-400 hover:text-white text-2xl">✕</button>
+            </div>
+            <div id="missionContent" class="space-y-6">
+                <!-- Mission content will be dynamically loaded -->
+            </div>
+            <div class="flex justify-between mt-8">
+                <button id="prevMissionStep" class="bg-gray-600 hover:bg-gray-700 px-6 py-2 rounded-lg transition-colors hidden">
+                    Previous
+                </button>
+                <button id="nextMissionStep" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg transition-colors ml-auto">
+                    Next Step
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let userProgress = {
+            missionsCompleted: 0,
+            quizScore: 0,
+            totalPoints: 0,
+            completedMissions: []
+        };
+        
+        let currentQuizIndex = 0;
+        let currentMissionStep = 0;
+        let currentMission = null;
+
+        // Quiz questions
+        const quizQuestions = [
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                correct: 1
+            },
+            {
+                question: "How many moons does Earth have?",
+                options: ["0", "1", "2", "3"],
+                correct: 1
+            },
+            {
+                question: "Which is the largest planet in our solar system?",
+                options: ["Saturn", "Jupiter", "Neptune", "Uranus"],
+                correct: 1
+            },
+            {
+                question: "What is the closest star to Earth?",
+                options: ["Alpha Centauri", "Sirius", "The Sun", "Proxima Centauri"],
+                correct: 2
+            },
+            {
+                question: "Which planet has the most extensive ring system?",
+                options: ["Jupiter", "Saturn", "Uranus", "Neptune"],
+                correct: 1
+            }
+        ];
+
+        // Mission data
+        const missions = {
+            mars: {
+                title: "Mars Exploration",
+                icon: "🔴",
+                steps: [
+                    {
+                        title: "Welcome to Mars",
+                        content: `
+                            <div class="text-center mb-6">
+                                <div class="text-6xl mb-4">🔴</div>
+                                <h3 class="text-xl font-bold mb-4">Welcome to the Red Planet!</h3>
+                                <p class="text-gray-300">Mars is the fourth planet from the Sun and the second-smallest planet in our solar system. Let's explore what makes this planet so fascinating!</p>
+                            </div>
+                            <div class="bg-red-900/30 p-4 rounded-lg">
+                                <h4 class="font-bold mb-2">Quick Facts:</h4>
+                                <ul class="text-sm space-y-1 text-gray-300">
+                                    <li>• Distance from Sun: 227.9 million km</li>
+                                    <li>• Day length: 24 hours 37 minutes</li>
+                                    <li>• Year length: 687 Earth days</li>
+                                    <li>• Moons: 2 (Phobos and Deimos)</li>
+                                </ul>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "Martian Atmosphere",
+                        content: `
+                            <div class="mb-6">
+                                <h3 class="text-xl font-bold mb-4">The Martian Atmosphere</h3>
+                                <p class="text-gray-300 mb-4">Mars has a thin atmosphere composed mainly of carbon dioxide. This creates unique weather patterns and seasonal changes.</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-blue-900/30 p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">Composition</h4>
+                                    <ul class="text-sm text-gray-300">
+                                        <li>• 95% Carbon Dioxide</li>
+                                        <li>• 3% Nitrogen</li>
+                                        <li>• 2% Other gases</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-red-900/30 p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">Weather</h4>
+                                    <ul class="text-sm text-gray-300">
+                                        <li>• Dust storms</li>
+                                        <li>• Polar ice caps</li>
+                                        <li>• Temperature: -80°C to 20°C</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "Mission Complete!",
+                        content: `
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">🎉</div>
+                                <h3 class="text-2xl font-bold mb-4 text-green-400">Mission Accomplished!</h3>
+                                <p class="text-gray-300 mb-6">Congratulations! You've successfully completed the Mars Exploration mission. You've earned 100 Space Points!</p>
+                                <div class="bg-green-900/30 p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">What you learned:</h4>
+                                    <ul class="text-sm text-gray-300 text-left">
+                                        <li>• Mars is called the Red Planet due to iron oxide</li>
+                                        <li>• It has a thin atmosphere mostly of CO₂</li>
+                                        <li>• Mars has extreme weather including dust storms</li>
+                                        <li>• It has two small moons: Phobos and Deimos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            jupiter: {
+                title: "Jupiter's Moons",
+                icon: "🟡",
+                steps: [
+                    {
+                        title: "The Gas Giant",
+                        content: `
+                            <div class="text-center mb-6">
+                                <div class="text-6xl mb-4">🟡</div>
+                                <h3 class="text-xl font-bold mb-4">Jupiter: King of Planets</h3>
+                                <p class="text-gray-300">Jupiter is the largest planet in our solar system with over 80 known moons. Let's explore its most fascinating satellites!</p>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "The Galilean Moons",
+                        content: `
+                            <div class="mb-6">
+                                <h3 class="text-xl font-bold mb-4">The Four Largest Moons</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-blue-900/30 p-4 rounded-lg">
+                                        <h4 class="font-bold">🌙 Europa</h4>
+                                        <p class="text-sm text-gray-300">Ice-covered moon with subsurface ocean</p>
+                                    </div>
+                                    <div class="bg-yellow-900/30 p-4 rounded-lg">
+                                        <h4 class="font-bold">🌋 Io</h4>
+                                        <p class="text-sm text-gray-300">Most volcanically active body</p>
+                                    </div>
+                                    <div class="bg-gray-700/30 p-4 rounded-lg">
+                                        <h4 class="font-bold">🌑 Ganymede</h4>
+                                        <p class="text-sm text-gray-300">Largest moon in solar system</p>
+                                    </div>
+                                    <div class="bg-purple-900/30 p-4 rounded-lg">
+                                        <h4 class="font-bold">🌘 Callisto</h4>
+                                        <p class="text-sm text-gray-300">Heavily cratered surface</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "Mission Complete!",
+                        content: `
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">🎉</div>
+                                <h3 class="text-2xl font-bold mb-4 text-green-400">Jupiter Mission Complete!</h3>
+                                <p class="text-gray-300 mb-6">Excellent work! You've earned 150 Space Points for exploring Jupiter's moon system!</p>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            earth: {
+                title: "Earth Systems",
+                icon: "🌍",
+                steps: [
+                    {
+                        title: "Our Home Planet",
+                        content: `
+                            <div class="text-center mb-6">
+                                <div class="text-6xl mb-4">🌍</div>
+                                <h3 class="text-xl font-bold mb-4">Earth: The Perfect Planet</h3>
+                                <p class="text-gray-300">Earth is the only known planet with life. Let's explore what makes our home so special!</p>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "Mission Complete!",
+                        content: `
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">🎉</div>
+                                <h3 class="text-2xl font-bold mb-4 text-green-400">Earth Mission Complete!</h3>
+                                <p class="text-gray-300 mb-6">Great job! You've earned 75 Space Points!</p>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            sun: {
+                title: "Solar Science",
+                icon: "☀️",
+                steps: [
+                    {
+                        title: "Our Star",
+                        content: `
+                            <div class="text-center mb-6">
+                                <div class="text-6xl mb-4">☀️</div>
+                                <h3 class="text-xl font-bold mb-4">The Sun: Our Life-Giving Star</h3>
+                                <p class="text-gray-300">The Sun is the center of our solar system and the source of all energy for life on Earth!</p>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "Mission Complete!",
+                        content: `
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">🎉</div>
+                                <h3 class="text-2xl font-bold mb-4 text-green-400">Solar Mission Complete!</h3>
+                                <p class="text-gray-300 mb-6">Fantastic! You've earned 125 Space Points!</p>
+                            </div>
+                        `
+                    }
+                ]
+            }
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProgress();
+            updateProgressDisplay();
+            loadCurrentQuiz();
+            
+            // Event listeners
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                document.getElementById('loginModal').classList.remove('hidden');
+            });
+            
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('loginModal').classList.add('hidden');
+            });
+            
+            document.getElementById('teacherLogin').addEventListener('click', () => {
+                login('teacher');
+            });
+            
+            document.getElementById('studentLogin').addEventListener('click', () => {
+                login('student');
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            document.getElementById('closeMissionModal').addEventListener('click', () => {
+                document.getElementById('missionModal').classList.add('hidden');
+            });
+            
+            document.getElementById('nextMissionStep').addEventListener('click', nextMissionStep);
+            document.getElementById('prevMissionStep').addEventListener('click', prevMissionStep);
+        });
+
+        // User management
+        function login(userType) {
+            currentUser = {
+                type: userType,
+                name: userType === 'teacher' ? 'Ms. Johnson' : 'Alex Student'
+            };
+            
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            if (userType === 'teacher') {
+                document.getElementById('teacherDashboard').classList.remove('hidden');
+            }
+            
+            saveUserProgress();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('userInfo').classList.add('hidden');
+            document.getElementById('teacherDashboard').classList.add('hidden');
+        }
+
+        // Progress management
+        function loadUserProgress() {
+            const saved = localStorage.getItem('spaceEducationProgress');
+            if (saved) {
+                userProgress = JSON.parse(saved);
+            }
+        }
+
+        function saveUserProgress() {
+            localStorage.setItem('spaceEducationProgress', JSON.stringify(userProgress));
+        }
+
+        function updateProgressDisplay() {
+            document.getElementById('missionsCompleted').textContent = `${userProgress.missionsCompleted}/4`;
+            document.getElementById('missionProgress').style.width = `${(userProgress.missionsCompleted / 4) * 100}%`;
+            document.getElementById('quizScore').textContent = `${userProgress.quizScore}%`;
+            document.getElementById('scoreProgress').style.width = `${userProgress.quizScore}%`;
+            document.getElementById('totalPoints').textContent = userProgress.totalPoints;
+        }
+
+        // Quiz functionality
+        function loadCurrentQuiz() {
+            const quiz = quizQuestions[currentQuizIndex];
+            document.getElementById('quizQuestion').textContent = quiz.question;
+            
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach((option, index) => {
+                option.textContent = quiz.options[index];
+                option.classList.remove('bg-green-600', 'bg-red-600', 'bg-gray-700');
+                option.classList.add('bg-gray-700');
+                option.disabled = false;
+            });
+            
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+        }
+
+        function selectAnswer(button, isCorrect) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => option.disabled = true);
+            
+            if (isCorrect) {
+                button.classList.remove('bg-gray-700');
+                button.classList.add('bg-green-600');
+                userProgress.totalPoints += 10;
+                
+                // Update quiz score
+                const correctAnswers = Math.floor(userProgress.totalPoints / 10);
+                const totalQuestions = currentQuizIndex + 1;
+                userProgress.quizScore = Math.round((correctAnswers / Math.max(totalQuestions, 5)) * 100);
+            } else {
+                button.classList.remove('bg-gray-700');
+                button.classList.add('bg-red-600');
+                
+                // Show correct answer
+                const quiz = quizQuestions[currentQuizIndex];
+                options[quiz.correct].classList.remove('bg-gray-700');
+                options[quiz.correct].classList.add('bg-green-600');
+            }
+            
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+            updateProgressDisplay();
+            saveUserProgress();
+        }
+
+        function nextQuiz() {
+            currentQuizIndex = (currentQuizIndex + 1) % quizQuestions.length;
+            loadCurrentQuiz();
+        }
+
+        // Mission functionality
+        function startMission(missionId) {
+            currentMission = missionId;
+            currentMissionStep = 0;
+            
+            const mission = missions[missionId];
+            document.getElementById('missionTitle').textContent = `Mission: ${mission.title}`;
+            document.getElementById('missionModal').classList.remove('hidden');
+            
+            loadMissionStep();
+        }
+
+        function loadMissionStep() {
+            const mission = missions[currentMission];
+            const step = mission.steps[currentMissionStep];
+            
+            document.getElementById('missionContent').innerHTML = step.content;
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevMissionStep');
+            const nextBtn = document.getElementById('nextMissionStep');
+            
+            if (currentMissionStep === 0) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+            
+            if (currentMissionStep === mission.steps.length - 1) {
+                nextBtn.textContent = 'Complete Mission';
+            } else {
+                nextBtn.textContent = 'Next Step';
+            }
+        }
+
+        function nextMissionStep() {
+            const mission = missions[currentMission];
+            
+            if (currentMissionStep === mission.steps.length - 1) {
+                // Complete mission
+                if (!userProgress.completedMissions.includes(currentMission)) {
+                    userProgress.completedMissions.push(currentMission);
+                    userProgress.missionsCompleted++;
+                    
+                    // Award points based on mission
+                    const points = {
+                        mars: 100,
+                        jupiter: 150,
+                        earth: 75,
+                        sun: 125
+                    };
+                    userProgress.totalPoints += points[currentMission] || 100;
+                }
+                
+                updateProgressDisplay();
+                saveUserProgress();
+                document.getElementById('missionModal').classList.add('hidden');
+            } else {
+                currentMissionStep++;
+                loadMissionStep();
+            }
+        }
+
+        function prevMissionStep() {
+            if (currentMissionStep > 0) {
+                currentMissionStep--;
+                loadMissionStep();
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9670f68e56573520',t:'MTc1MzgzNzY4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
